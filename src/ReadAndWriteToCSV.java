@@ -5,31 +5,34 @@ import java.io.FileWriter;
 import java.util.TreeMap;
 
 public class ReadAndWriteToCSV {
+    public static String inputFiles[] = {"Files/In/Postcode1.csv", "Files/In/Postcode2.csv", "Files/In/Postcode3.csv", "Files/In/Postcode4.csv"};
+    public static String outputFiles[] = {"Files/Out/output1.csv", "Files/Out/output2.csv", "Files/Out/output3.csv", "Files/Out/output4.csv"};
+    public static String line = "";
+    public static String cvsSplitBy = ",";
+    public static Boolean printHeader = true;
+
+    public static long id = 1000000;
+    public static int product_id = 1000000;
+    public static int update_user = 1;
+    public static int update_version = 0;
+    public static int reserved_value_flag = 0;
+    public static int is_default = 0;
+    public static int sort_order = 0;
+    public static int riskTypeID;
+    public static String riskValue = null;
+    public static String update_date = "\"2019-02-18 00:56:01\"";
 
     public static void main(String[] args) {
-        System.out.println("Job Started at " + java.time.LocalTime.now());
-        readDataLineByLine();
-        System.out.println("Job Finished at " + java.time.LocalTime.now());
+        System.out.println("Conversion Started at " + java.time.LocalTime.now());
+        for(int v = 0; v < inputFiles.length; v++) {
+            readDataLineByLine(inputFiles[v], outputFiles[v]);
+            System.out.println("File " + (v + 1) + " done");
+        }
+        System.out.println("Conversion Finished at " + java.time.LocalTime.now());
 
     }
 
-    private static void readDataLineByLine() {
-        String csvFile = "src/Postcode 2 ka 2.csv";
-        String outputCsvFile = "src/output4.csv";
-        String line = "";
-        String cvsSplitBy = ",";
-
-
-        long id = 1000000;
-        int product_id = 1000000;
-        int update_user = 1;
-        int update_version = 0;
-        int reserved_value_flag = 0;
-        int is_default = 0;
-        int sort_order = 0;
-        int riskTypeID;
-        String riskValue = null;
-        String update_date = "\"2019-02-18 00:56:01\"";
+    private static void readDataLineByLine(String inputCsvFile, String outputCsvFile) {
 
 
         TreeMap<String, Long> acronRAG = acronRAGSetUp(new TreeMap<String, Long>(String.CASE_INSENSITIVE_ORDER));
@@ -38,11 +41,13 @@ public class ReadAndWriteToCSV {
 
 
 
-        try (BufferedReader inputFileBR = new BufferedReader(new FileReader(csvFile))) {
+        try (BufferedReader inputFileBR = new BufferedReader(new FileReader(inputCsvFile))) {
             try (BufferedWriter outputFileBW = new BufferedWriter(new FileWriter(outputCsvFile))) {
-
-                outputFileBW.write("ID,PRODUCT_ID,RISK_TYPE_ID,KEY_VALUE,RISK_VALUE,UPDATE_USER,UPDATE_DATE,UPDATE_VERSION,RESERVED_VALUE_FLAG,IS_DEFAULT,EXTERNAL_CODE,DISCONTINUE_DATE,DEVELOPER_DESC,SORT_ORDER");
-                outputFileBW.newLine();
+                if(printHeader) {
+                    outputFileBW.write("ID,PRODUCT_ID,RISK_TYPE_ID,KEY_VALUE,RISK_VALUE,UPDATE_USER,UPDATE_DATE,UPDATE_VERSION,RESERVED_VALUE_FLAG,IS_DEFAULT,EXTERNAL_CODE,DISCONTINUE_DATE,DEVELOPER_DESC,SORT_ORDER");
+                    outputFileBW.newLine();
+                    printHeader = false;
+                }
 
                 while ((line = inputFileBR.readLine()) != null) {
                     String[] columnNo = line.split(cvsSplitBy);
@@ -127,7 +132,7 @@ public class ReadAndWriteToCSV {
                                 break;
                         }
 
-                        if (riskValue != null) {
+                        if (riskValue != null && !riskValue.isEmpty()) {
                             outputFileBW.write(id++ + "," + product_id + "," + riskTypeID + "," + columnNo[0] + "," + riskValue + "," + update_user + "," + update_date + "," + update_version + "," + reserved_value_flag + "," + is_default + "," + "" + "," + "" + "," + "" + "," + sort_order);
                             //id        //product_id    //riskType              //keyValue           //riskValue          //update_user    //update_date       //update_version        //valueFLag                    //is_default //externalCode  //disconDate //devDesc //sortOder
                             outputFileBW.newLine();
