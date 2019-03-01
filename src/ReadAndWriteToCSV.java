@@ -29,17 +29,13 @@ public class ReadAndWriteToCSV {
             System.out.println("File " + (v + 1) + " done");
         }
         System.out.println("Conversion Finished at " + java.time.LocalTime.now());
-
     }
 
     private static void readDataLineByLine(String inputCsvFile, String outputCsvFile) {
 
-
         TreeMap<String, Long> acronRAG = acronRAGSetUp(new TreeMap<String, Long>(String.CASE_INSENSITIVE_ORDER));
         TreeMap<String, Long> mapflow = mapflowSetUp(new TreeMap<String, Long>(String.CASE_INSENSITIVE_ORDER));
         TreeMap<String, Long> segment = segmentSetUp(new TreeMap<String, Long>(String.CASE_INSENSITIVE_ORDER));
-
-
 
         try (BufferedReader inputFileBR = new BufferedReader(new FileReader(inputCsvFile))) {
             try (BufferedWriter outputFileBW = new BufferedWriter(new FileWriter(outputCsvFile))) {
@@ -51,6 +47,7 @@ public class ReadAndWriteToCSV {
 
                 while ((line = inputFileBR.readLine()) != null) {
                     String[] columnNo = line.split(cvsSplitBy);
+                    String keyValue = columnNo[0].replaceAll("\\s+","");
                     int i = 1;
 
                     while (i < 17) {
@@ -113,7 +110,8 @@ public class ReadAndWriteToCSV {
                                 break;
                             case 13:
                                 // PC Sector
-                                riskTypeID = 0;
+                                riskTypeID = 0; //todo: PC sector shouldn't be included
+                                riskValue = null;
                                 break;
                             case 14:
                                 // Motor_Property_Area
@@ -133,8 +131,8 @@ public class ReadAndWriteToCSV {
                         }
 
                         if (riskValue != null && !riskValue.isEmpty()) {
-                            outputFileBW.write(id++ + "," + product_id + "," + riskTypeID + "," + columnNo[0] + "," + riskValue + "," + update_user + "," + update_date + "," + update_version + "," + reserved_value_flag + "," + is_default + "," + "" + "," + "" + "," + "" + "," + sort_order);
-                            //id        //product_id    //riskType              //keyValue           //riskValue          //update_user    //update_date       //update_version        //valueFLag                    //is_default //externalCode  //disconDate //devDesc //sortOder
+                            outputFileBW.write(id++ + "," + product_id + "," + riskTypeID + "," + keyValue + "," + riskValue + "," + update_user + "," + update_date + "," + update_version + "," + reserved_value_flag + "," + is_default + "," + "" + "," + "" + "," + "" + "," + sort_order);
+                                                //id        //product_id    //riskType              //keyValue           //riskValue          //update_user    //update_date       //update_version        //valueFLag                    //is_default //externalCode  //disconDate //devDesc //sortOder
                             outputFileBW.newLine();
                         }
                         i++;
@@ -142,12 +140,15 @@ public class ReadAndWriteToCSV {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                return;
             }
         } catch (Exception e) {
             e.printStackTrace();
+            return;
         }
     }
 
+    //select * from T_COLOR
     private static TreeMap<String, Long> acronRAGSetUp(TreeMap<String, Long> acronRAG) {
         acronRAG.put("Black", 1L);
         acronRAG.put("Green", 2L);
@@ -171,6 +172,7 @@ public class ReadAndWriteToCSV {
         return acronRAG;
     }
 
+    //select * from T_MAPFLOW_NFCAT_HSCX
     private static TreeMap<String, Long> mapflowSetUp(TreeMap<String, Long> mapflow) {
         mapflow.put("Clean", 1000004L);
         mapflow.put("Decline", 1000009L);
@@ -179,11 +181,12 @@ public class ReadAndWriteToCSV {
         mapflow.put("Refer", 1000008L);
         mapflow.put("Scotland", 1000007L);
         mapflow.put("Significant", 1000001L);
-        mapflow.put("Unknown", 1000005L); //TODO: to verify which unknown to take
-        mapflow.put("Unknown", 1000006L);
+        //mapflow.put("Unknown", 1000005L); //TODO: to verify which unknown to take
+        //mapflow.put("Unknown", 1000006L);
         return mapflow;
     }
 
+    //select * from T_SEGMENT_HSCX
     private static TreeMap<String, Long> segmentSetUp(TreeMap<String, Long> segment) {
         segment.put("Decline", 1000001L);
         segment.put("Bronze", 1000002L);
